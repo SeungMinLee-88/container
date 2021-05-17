@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+   ora11gEX:
+     image: oracle:lsm
+     networks:
+       app_net:
+         ipv4_address: 172.16.0.3
+     container_name: oracle_cont
+     volumes:
+      - compose_vol:/compose_vol
+     ports:
+      - 1522:1522
+     shm_size: '1500mb'
+     env_file:
+       - ./.env_oracle
+     restart: always
+     
+   tomcatWAS:
+     image: tomcat:lsm
+     container_name: tomcat_cont
+     networks:
+       app_net:
+         ipv4_address: 172.16.0.4
+     volumes:
+      - tomcat_webapps:/install_tomcat/tomcat/webapps
+     ports:
+      - 8080:8080
+     environment:
+       DATABASE_URL: "jdbc:oracle:thin:@172.16.0.3:1522:xe"
+       DATABASE_ID: "system"
+       DATABASE_PASS: "123qwe"
+     depends_on:
+      - ora11gEX
+      - centosSrv
+     restart: "no"
+   centosSrv:
+     image: basic:lsm
+     networks:
+       app_net:
+         ipv4_address: 172.16.0.2
+     ports:
+      - 22
+     container_name: basic_cont
+     environment:
+       NAME_ENV: "CentOS7.4"
+     restart: "no"
+volumes:
+  compose_vol:
+    external: true
+  tomcat_webapps:
+    external: true
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.0.0/16"

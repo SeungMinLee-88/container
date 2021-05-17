@@ -1,0 +1,26 @@
+# step 1
+FROM centos:lsm
+
+# step 2
+RUN mkdir install_tomcat
+WORKDIR /install_tomcat
+ENV DATABASE_URL="jdbc:oracle:thin:@172.17.0.4:1522:xe"
+ENV DATABASE_ID="system"
+ENV DATABASE_PASS="123qwe"
+
+# step 3
+ADD apache-tomcat-8.0.32.tar.gz .
+RUN chmod 644 apache-tomcat-8.0.32
+RUN mv apache-tomcat-8.0.32 tomcat
+RUN rm -rf tomcat/webapps/*
+RUN rm -rf tomcat/conf/server.xml
+COPY server.xml tomcat/conf/
+COPY book_conference.war tomcat/webapps/
+
+# step 4
+EXPOSE 8080/tcp
+CMD ["./tomcat/bin/catalina.sh","run"]
+
+
+
+

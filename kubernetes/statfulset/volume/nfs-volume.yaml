@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-nfs-pvc
+  labels:
+    app: tomcat
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  volumeName: pv-nfs
+  resources:
+    requests:
+      storage: 1Gi

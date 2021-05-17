@@ -1,0 +1,16 @@
+# step 1
+FROM centos:lsm
+
+# step 2
+ENV ORACLE_WEB=28080
+ENV ORACLE_PORT=1523
+ENV ORACLE_PASS=qwe123
+
+# step 3
+COPY configure_oracle.sh .
+COPY oracle-xe-11.2.0-1.0.x86_64.rpm .
+RUN chmod +x configure_oracle.sh
+
+# step 4
+#RUN ls -l
+CMD ["sh", "-c", "tail -f"]

@@ -1,0 +1,42 @@
+# step 1
+FROM docker.io/images4dev/centos7
+# step 2 copy package
+RUN mkdir install
+COPY libaio-0.3.109-13.el7.x86_64.rpm install
+COPY net-tools-2.0-0.25.20131004git.el7.x86_64.rpm install
+COPY bc-1.06.95-13.el7.x86_64.rpm install
+COPY initscripts-9.49.53-1.el7_9.1.x86_64.rpm install
+COPY iproute-4.11.0-30.el7.x86_64.rpm install
+COPY iptables-1.4.21-35.el7.x86_64.rpm install
+COPY sysvinit-tools-2.88-14.dsf.el7.x86_64.rpm install
+COPY libmnl-1.0.3-7.el7.x86_64.rpm install
+COPY libnetfilter_conntrack-1.0.6-1.el7_3.x86_64.rpm install
+COPY libnetfilter_cthelper-1.0.0-11.el7.x86_64.rpm install
+COPY libnetfilter_cttimeout-1.0.0-7.el7.x86_64.rpm install
+COPY libnetfilter_queue-1.0.2-2.el7_2.x86_64.rpm install
+COPY libnfnetlink-1.0.1-4.el7.x86_64.rpm install
+
+# step 3 install yum
+RUN yum install -y java-1.8.0-openjdk.x86_64
+RUN yum install -y telnet
+RUN yum install -y tcpdump
+
+# step 4 install package
+WORKDIR "/install"
+RUN rpm -ivh libmnl-1.0.3-7.el7.x86_64.rpm
+RUN rpm -ivh libnfnetlink-1.0.1-4.el7.x86_64.rpm
+RUN rpm -ivh libnetfilter_conntrack-1.0.6-1.el7_3.x86_64.rpm
+RUN rpm -ivh libnetfilter_cthelper-1.0.0-11.el7.x86_64.rpm
+RUN rpm -ivh libnetfilter_cttimeout-1.0.0-7.el7.x86_64.rpm
+RUN rpm -ivh libnetfilter_queue-1.0.2-2.el7_2.x86_64.rpm
+RUN rpm -ivh iptables-1.4.21-35.el7.x86_64.rpm
+RUN rpm -ivh sysvinit-tools-2.88-14.dsf.el7.x86_64.rpm
+RUN rpm -ivh iproute-4.11.0-30.el7.x86_64.rpm
+RUN rpm -ivh bc-1.06.95-13.el7.x86_64.rpm
+RUN rpm -ivh libaio-0.3.109-13.el7.x86_64.rpm
+RUN rpm -ivh net-tools-2.0-0.25.20131004git.el7.x86_64.rpm
+RUN rpm -ivh initscripts-9.49.53-1.el7_9.1.x86_64.rpm
+
+#RUN java -version
+#RUN pwd
+#RUN ls -l

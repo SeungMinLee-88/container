@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle
+  labels:
+    app: oracle
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oraclecnt
+      typical: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: oraclecnt
+        typical: frontend
+#typical is custom label variable can assign label variable
+    spec:
+      containers:
+      - name: oracle
+        image: rogirl71/oracle:1.0.0
+        resources:
+          limits:
+            memory: "1024Mi"
+            #memory: "1280Mi"
+          requests:
+            memory: "256Mi"
+        env:
+        - name: ORCLE_WEB
+          value: "28080"
+        - name: ORACLE_PORT
+          value: "1522"
+        - name: ORACLE_PASS
+          value: "123qwe"
+        ports:
+        - containerPort: 1522
+          name: oracle
+        volumeMounts:
+        - name: oracle-tmpfs-storage
+          mountPath: /dev/shm
+      volumes:
+      - name: oracle-tmpfs-storage
+        emptyDir:
+          medium: Memory

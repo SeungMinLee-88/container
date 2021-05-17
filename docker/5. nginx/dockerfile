@@ -1,0 +1,61 @@
+# step 1 set arg and work dir
+FROM centos:lsm
+WORKDIR /root
+ARG USER
+ARG DIR
+ENV PATHVAL=/home/${USER:-laravel}/${DIR:-demo}/public
+RUN echo "arg1 : ${USER:-laravel}"
+RUN echo "arg2 : "${DIR:-demo}
+RUN echo "env1 : "${PATHVAL}
+
+# step 2 copy install package
+RUN mkdir install
+COPY installphp.sh install
+RUN chmod +x install/installphp.sh
+
+# step 3 install package(php, composer, nginx)
+RUN yum install yum-utils -y
+RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RUN rpm -Uvh https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+RUN yum-config-manager --disable remi-php72
+RUN yum-config-manager --enable remi-php74
+RUN ./install/installphp.sh
+RUN yum install -y curl
+RUN yum install -y nginx
+RUN curl -sS https://getcomposer.org/installer | php  
+RUN cp composer.phar /usr/bin/composer
+RUN composer global require laravel/installer
+
+# step 4 copy and make config file
+COPY nginx.conf install
+COPY php-fpm.conf install
+COPY www.conf install
+ADD sites-available.tar.gz install
+RUN yum install sudo -y
+RUN useradd ${USER:-laravel}
+WORKDIR "install"
+RUN yes | cp -pR sites-available /home/${USER:-laravel}/sites-available
+RUN yes | cp -pR nginx.conf /etc/nginx/
+RUN yes | cp -pR www.conf /etc/php-fpm.d/
+RUN yes | cp -pR php-fpm.conf /etc/
+RUN sed -i "s/laravel/${USER:-laravel}/g" /etc/nginx/nginx.conf
+RUN sed -i "s/laravel/${USER:-laravel}/g" /etc/php-fpm.d/www.conf
+
+# step 5 make new laravel prj
+RUN sudo -i -u ${USER:-laravel} -H sh -c "composer global require laravel/installer"
+RUN sudo -i -u ${USER:-laravel} -H sh -c "echo 'export PATH=$PATH:~/.config/composer/vendor/bin/' >> ~/.bashrc"
+RUN sudo -i -u ${USER:-laravel} -H sh -c ". ~/.bashrc"
+RUN sudo -i -u ${USER:-laravel} -H sh -c "laravel new ${DIR:-demo}"
+RUN sudo -i -u ${USER:-laravel} -H sh -c "cd /home/${USER:-laravel}/${DIR:-demo}"
+RUN mkdir /var/run/php-fpm
+RUN touch /var/run/php-fpm/php-fpm.pid
+RUN touch /var/run/php-fpm/php-fpm.sock
+RUN ls -l /home/${USER:-laravel}/
+
+# step 6 start nginx service
+COPY startnginx.sh .
+RUN chmod +x startnginx.sh
+CMD ["sh", "startnginx.sh"]
+# when use systemctl command
+#CMD ["/usr/sbin/init"]
+#CMD ["nginx", "-g", "daemon off;"]

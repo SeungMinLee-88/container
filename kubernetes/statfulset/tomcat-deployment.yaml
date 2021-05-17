@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+  labels:
+    app: tomcat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tomcatcnt
+      typical: frontend
+  strategy:
+    type: RollingUpdate 
+  template:
+    metadata:
+      labels:
+        app: tomcatcnt
+        typical: frontend
+#typical is custom label variable can assign label variable
+    spec:
+      securityContext:
+        runAsUser: 0
+        #runAsGroup: 0
+        fsGroup: 0
+        #allowPrivilegeEscalation: true
+      containers:
+      - name: tomcat
+        image: rogirl71/tomcat:1.0.0
+        env:
+          - name: DATABASE_ID
+            valueFrom:
+              configMapKeyRef:
+                name: tomcat-config
+                key: database_id
+          - name: DATABASE_PASS
+            valueFrom:
+              configMapKeyRef:
+                name: tomcat-config
+                key: database_pass
+          - name: DATABASE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: tomcat-config
+                key: database_url
+        ports:
+        - containerPort: 18080
+          name: tomcat
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: tomcat-persistent-storage
+          mountPath: /install_tomcat/tomcat/webapps
+      volumes:
+      - name: tomcat-persistent-storage
+        persistentVolumeClaim:
+          claimName: pv-nfs-pvc

@@ -1,0 +1,42 @@
+# step 1 ready for install
+FROM centos:lsm
+WORKDIR /root
+ARG user
+ARG dir
+ARG port
+
+# step 2 install package
+RUN mkdir install
+COPY installphp.sh install
+RUN chmod +x install/installphp.sh
+RUN yum install yum-utils -y
+RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RUN rpm -Uvh https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+RUN yum-config-manager --disable remi-php72
+RUN yum-config-manager --enable remi-php74
+RUN yum list php-common
+RUN ./install/installphp.sh
+RUN yum install sudo -y
+RUN yum install -y curl
+
+# step 3 install laravel
+RUN curl -sS https://getcomposer.org/installer | php  
+RUN cp composer.phar /usr/bin/composer
+RUN composer global require laravel/installer
+RUN ["/bin/bash", "-c", "echo PATH=$PATH:~/.composer/vendor/bin/ >> ~/.bashrc"]
+RUN ["/bin/bash", "-c", "source ~/.bashrc"]
+
+# step 4 set env & make laravel project
+RUN useradd ${user:-www-data}
+RUN sudo -i -u ${user:-www-data} -H sh -c "composer global require laravel/installer"
+RUN sudo -i -u ${user:-www-data} -H sh -c "echo 'export PATH=$PATH:~/.config/composer/vendor/bin/' >> ~/.bashrc"
+RUN sudo -i -u ${user:-www-data} -H sh -c ". ~/.bashrc"
+RUN sudo -i -u ${user:-www-data} -H sh -c "laravel new ${dir:-demo}"
+RUN sudo -i -u ${user:-www-data} -H sh -c "cd /home/${user:-www-data}/${dir:-demo}"
+
+# step 5 run service
+WORKDIR "/home/${user:-www-data}/${dir:-demo}"
+USER ${user:-www-data}
+RUN cd ~/${dir:-demo}
+EXPOSE 9000
+CMD ["php", "artisan", "serve", "--port=9000", "--host=0.0.0.0"]

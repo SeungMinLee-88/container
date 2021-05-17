@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tomcat-config
+data:
+  database_id: "system"
+  database_pass: "123qwe"
+  database_url: "jdbc:oracle:thin:@10.105.138.222:1522:xe"
