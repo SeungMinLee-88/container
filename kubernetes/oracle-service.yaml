@@ -8,12 +8,8 @@ spec:
   ports:
     - port: 1522
       protocol: TCP
-#      targetPort: 9376
   clusterIP: 10.105.138.222
   selector:
     app: oraclecnt
     typical: frontend
   type: NodePort
-#  clusterIP: 192.168.56.4
-#kubectl expose deployment hello-minikube --type=NodePort --port=8080
-#kubectl port-forward service/hello-minikube 7080:8080

@@ -17,7 +17,6 @@ spec:
       labels:
         app: oraclecnt
         typical: frontend
-#typical is custom label variable can assign label variable
     spec:
       containers:
       - name: oracle

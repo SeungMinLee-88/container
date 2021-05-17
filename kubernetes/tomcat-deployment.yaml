@@ -17,7 +17,6 @@ spec:
       labels:
         app: tomcatcnt
         typical: frontend
-#typical is custom label variable can assign label variable
     spec:
       securityContext:
         runAsUser: 0

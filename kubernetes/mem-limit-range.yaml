@@ -12,5 +12,4 @@ spec:
       memory: 1024Mi
     min:
       memory: 128Mi
-
     type: Container
